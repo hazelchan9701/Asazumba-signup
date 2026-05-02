@@ -25,8 +25,8 @@
   .row-l{color:#86868b;flex-shrink:0}
   .row-v{color:#1d1d1f;font-weight:500;text-align:right}
   .count-badge{display:inline-flex;align-items:center;background:#ffe5e5;color:#ff6b6b;font-size:13px;padding:3px 12px;border-radius:10px;font-weight:600}
-  input[type=text]{width:100%;padding:12px 14px;font-size:15px;border:1px solid #d2d2d7;border-radius:10px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s}
-  input[type=text]:focus{border-color:#ff6b6b}
+  input[type=text],input[type=tel]{width:100%;padding:12px 14px;font-size:15px;border:1px solid #d2d2d7;border-radius:10px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s}
+  input[type=text]:focus,input[type=tel]:focus{border-color:#ff6b6b}
   .btn{width:100%;padding:14px;font-size:15px;font-weight:600;border-radius:12px;cursor:pointer;border:none;background:#1d1d1f;color:#fff;transition:all .15s;font-family:inherit;-webkit-appearance:none}
   .btn:hover{opacity:.85}
   .btn:active{transform:scale(.98)}
@@ -42,7 +42,9 @@
   .list li:last-child{border-bottom:none}
   .avatar{width:32px;height:32px;border-radius:50%;background:#ffe5e5;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
   .name{flex:1;color:#1d1d1f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .time{font-size:11px;color:#a1a1a6;flex-shrink:0}
+  .time{font-size:11px;color:#a1a1a6;flex-shrink:0;margin-right:8px}
+  .cancel-link{font-size:12px;color:#a1a1a6;background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 6px}
+  .cancel-link:hover{color:#ff6b6b;text-decoration:underline}
   .empty{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
   .step{display:none}
   .step.active{display:block}
@@ -53,6 +55,9 @@
   .footer{font-size:11px;color:#a1a1a6;text-align:center;margin-top:24px;padding:0 8px;line-height:1.6}
   .refresh{background:none;border:none;color:#ff6b6b;font-size:13px;cursor:pointer;padding:6px;font-family:inherit;float:right;margin-top:-4px}
   .refresh:active{opacity:.5}
+  .label{font-size:13px;color:#86868b;margin-bottom:6px;display:block}
+  .input-group{margin-bottom:12px}
+  .code-highlight{background:#fff5f5;border:1px dashed #ff6b6b;border-radius:8px;padding:8px 12px;font-size:13px;color:#ff6b6b;margin:8px 0;text-align:center}
 </style>
 </head>
 <body>
@@ -119,10 +124,19 @@
 <div id="step-confirm" class="step">
   <button class="back" onclick="goBack('pay')">← 返回上一步</button>
   <div class="card">
-    <p class="card-h">第 2 步 · 填写微信昵称</p>
-    <p class="tip">填写你转账时使用的微信昵称，方便老师核对</p>
-    <input id="nickname-input" type="text" placeholder="例如：小张同学" maxlength="20" oninput="checkNickname()" />
-    <div style="height:10px"></div>
+    <p class="card-h">第 2 步 · 填写信息</p>
+
+    <div class="input-group">
+      <label class="label">微信昵称（方便老师核对）</label>
+      <input id="nickname-input" type="text" placeholder="例如：小张同学" maxlength="20" oninput="checkForm()" />
+    </div>
+
+    <div class="input-group">
+      <label class="label">取消码（4 位数字，自己设）</label>
+      <input id="code-input" type="tel" inputmode="numeric" pattern="[0-9]{4}" placeholder="例如：1234" maxlength="4" oninput="checkForm()" />
+      <p class="tip" style="margin-top:6px;margin-bottom:0">⚠️ 请记好这个码，将来取消报名时需要输入</p>
+    </div>
+
     <button class="btn" id="confirm-btn" onclick="submitSignup()" disabled>确认报名</button>
   </div>
 </div>
@@ -134,6 +148,10 @@
     <div class="row"><span class="row-l">课程</span><span class="row-v" id="done-class">—</span></div>
     <div class="row"><span class="row-l">昵称</span><span class="row-v" id="done-name">—</span></div>
     <div class="row"><span class="row-l">时间</span><span class="row-v" id="done-time">—</span></div>
+    <div class="code-highlight">
+      你的取消码：<strong id="done-code">—</strong><br/>
+      <span style="font-size:11px">⚠️ 请截图保存，取消报名时需要</span>
+    </div>
   </div>
   <button class="btn btn-2nd" onclick="goBack('select')">返回查看名单</button>
 </div>
@@ -203,7 +221,12 @@ async function renderClass() {
         const initial = s.nickname.slice(0, 1).toUpperCase();
         const t = new Date(s.created_at);
         const dateStr = `${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-        return `<li><div class="avatar">${escapeHtml(initial)}</div><span class="name">${escapeHtml(s.nickname)}</span><span class="time">${dateStr}</span></li>`;
+        return `<li>
+          <div class="avatar">${escapeHtml(initial)}</div>
+          <span class="name">${escapeHtml(s.nickname)}</span>
+          <span class="time">${dateStr}</span>
+          <button class="cancel-link" onclick="cancelSignup('${s.id}', '${escapeHtml(s.nickname)}')">取消</button>
+        </li>`;
       }).join('');
     }
   } catch (e) {
@@ -239,21 +262,24 @@ function goToConfirm() {
 function goBack(name) {
   if (name === 'select') {
     $('nickname-input').value = '';
-    checkNickname();
+    $('code-input').value = '';
+    checkForm();
     loadAllCounts();
     renderClass();
   }
   showStep(name);
 }
 
-function checkNickname() {
-  const v = $('nickname-input').value.trim();
-  $('confirm-btn').disabled = v.length === 0;
+function checkForm() {
+  const name = $('nickname-input').value.trim();
+  const code = $('code-input').value.trim();
+  $('confirm-btn').disabled = !(name.length > 0 && /^\d{4}$/.test(code));
 }
 
 async function submitSignup() {
   const name = $('nickname-input').value.trim();
-  if (!name) return;
+  const code = $('code-input').value.trim();
+  if (!name || !/^\d{4}$/.test(code)) return;
   const btn = $('confirm-btn');
   btn.disabled = true;
   btn.textContent = '提交中...';
@@ -261,12 +287,13 @@ async function submitSignup() {
   try {
     await sbFetch('signups', {
       method: 'POST',
-      body: JSON.stringify({ class_id: current, nickname: name })
+      body: JSON.stringify({ class_id: current, nickname: name, cancel_code: code })
     });
     const c = CLASSES[current];
     $('done-class').textContent = c.title;
     $('done-name').textContent = name;
     $('done-time').textContent = c.time;
+    $('done-code').textContent = code;
     showStep('done');
   } catch (e) {
     console.error(e);
@@ -274,6 +301,31 @@ async function submitSignup() {
   } finally {
     btn.disabled = false;
     btn.textContent = '确认报名';
+  }
+}
+
+async function cancelSignup(id, nickname) {
+  const code = prompt(`取消「${nickname}」的报名\n\n请输入当时设置的 4 位取消码：`);
+  if (code === null) return;
+  if (!/^\d{4}$/.test(code.trim())) {
+    alert('取消码必须是 4 位数字');
+    return;
+  }
+  try {
+    const data = await sbFetch(`signups?id=eq.${id}&cancel_code=eq.${code.trim()}`, {
+      method: 'DELETE',
+      headers: { 'Prefer': 'return=representation' }
+    });
+    if (Array.isArray(data) && data.length > 0) {
+      alert('已成功取消报名');
+      loadAllCounts();
+      renderClass();
+    } else {
+      alert('取消码错误，无法取消。\n如果忘了取消码，请联系老师处理。');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('操作失败：' + e.message);
   }
 }
 
