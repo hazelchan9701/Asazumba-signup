@@ -183,14 +183,20 @@ async function sbFetch(path, options = {}) {
     const text = await res.text();
     throw new Error(`API ${res.status}: ${text}`);
   }
-  return res.status === 204 ? null : res.json();
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return null;
+  }
 }
 
 async function loadAllCounts() {
   for (const k of Object.keys(CLASSES)) {
     try {
       const data = await sbFetch(`signups?class_id=eq.${k}&select=id`);
-      $('meta-' + k).textContent = `${data.length} 人已报名`;
+      $('meta-' + k).textContent = `${(data || []).length} 人已报名`;
     } catch (e) {
       console.error(e);
       $('meta-' + k).textContent = '加载失败';
@@ -210,7 +216,7 @@ async function renderClass() {
   $('signup-list').innerHTML = '<li class="loading">加载中...</li>';
 
   try {
-    const data = await sbFetch(`signups?class_id=eq.${current}&select=*&order=created_at.asc`);
+    const data = (await sbFetch(`signups?class_id=eq.${current}&select=*&order=created_at.asc`)) || [];
     $('class-count').textContent = `${data.length} 人`;
     $('meta-' + current).textContent = `${data.length} 人已报名`;
     const ul = $('signup-list');
@@ -285,7 +291,7 @@ async function submitSignup() {
   btn.textContent = '提交中...';
 
   try {
-   await sbFetch('signups', {
+    await sbFetch('signups', {
       method: 'POST',
       headers: { 'Prefer': 'return=minimal' },
       body: JSON.stringify({ class_id: current, nickname: name, cancel_code: code })
