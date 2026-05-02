@@ -285,8 +285,9 @@ async function submitSignup() {
   btn.textContent = '提交中...';
 
   try {
-    await sbFetch('signups', {
+   await sbFetch('signups', {
       method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
       body: JSON.stringify({ class_id: current, nickname: name, cancel_code: code })
     });
     const c = CLASSES[current];
