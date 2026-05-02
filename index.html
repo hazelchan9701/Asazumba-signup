@@ -7,24 +7,29 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:#f5f5f7;color:#1d1d1f;line-height:1.5;min-height:100vh;padding:16px;max-width:480px;margin:0 auto}
-  .header{margin-bottom:20px;padding:4px 4px 0}
+  .header{margin-bottom:20px;padding:4px 4px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .header-text{flex:1}
   .header h1{font-size:22px;font-weight:600;margin-bottom:4px}
   .header p{font-size:13px;color:#86868b}
-  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
-  .tab{background:#fff;border:1.5px solid transparent;border-radius:12px;padding:14px;cursor:pointer;text-align:left;transition:all .15s;font-family:inherit}
-  .tab.active{border-color:#ff6b6b;background:#fff5f5}
-  .tab-day{font-size:12px;font-weight:500;color:#86868b;margin-bottom:2px}
-  .tab.active .tab-day{color:#ff6b6b}
-  .tab-loc{font-size:15px;font-weight:600;color:#1d1d1f;margin-bottom:6px}
-  .tab.active .tab-loc{color:#ff6b6b}
-  .tab-meta{font-size:11px;color:#a1a1a6}
-  .tab.active .tab-meta{color:#ff6b6b}
+  .admin-link{font-size:11px;color:#a1a1a6;text-decoration:none;flex-shrink:0;padding:4px 8px;border:1px solid #e5e5e7;border-radius:6px;background:#fff}
+  .admin-link:hover{color:#ff6b6b}
+  .class-card{background:#fff;border:1.5px solid transparent;border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s;font-family:inherit;text-align:left;width:100%;display:block}
+  .class-card.ended{opacity:.5}
+  .class-card.cancelled{opacity:.4}
+  .class-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+  .class-card-date{font-size:13px;color:#86868b;font-weight:500}
+  .class-card-status{font-size:11px;padding:2px 8px;border-radius:10px;flex-shrink:0;font-weight:500}
+  .status-open{background:#e8f8ee;color:#0a7a3f}
+  .status-ended{background:#f0f0f2;color:#86868b}
+  .status-cancelled{background:#ffeaea;color:#c92a2a}
+  .class-card-loc{font-size:15px;font-weight:600;color:#1d1d1f;margin-bottom:6px}
+  .class-card-meta{font-size:12px;color:#86868b}
+  .class-card-count{display:inline-flex;align-items:center;background:#ffe5e5;color:#ff6b6b;font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600;margin-left:6px}
   .card{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:14px}
   .card-h{font-size:15px;font-weight:600;margin-bottom:12px}
   .row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;gap:8px}
   .row-l{color:#86868b;flex-shrink:0}
-  .row-v{color:#1d1d1f;font-weight:500;text-align:right}
-  .count-badge{display:inline-flex;align-items:center;background:#ffe5e5;color:#ff6b6b;font-size:13px;padding:3px 12px;border-radius:10px;font-weight:600}
+  .row-v{color:#1d1d1f;font-weight:500;text-align:right;word-break:break-all}
   input[type=text],input[type=tel]{width:100%;padding:12px 14px;font-size:15px;border:1px solid #d2d2d7;border-radius:10px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s}
   input[type=text]:focus,input[type=tel]:focus{border-color:#ff6b6b}
   .btn{width:100%;padding:14px;font-size:15px;font-weight:600;border-radius:12px;cursor:pointer;border:none;background:#1d1d1f;color:#fff;transition:all .15s;font-family:inherit;-webkit-appearance:none}
@@ -32,11 +37,10 @@
   .btn:active{transform:scale(.98)}
   .btn:disabled{opacity:.4;cursor:not-allowed}
   .btn-2nd{background:#fff;color:#1d1d1f;border:1px solid #d2d2d7}
-  .pay-box{background:#f5f5f7;border-radius:12px;padding:24px 16px;text-align:center;margin:8px 0 14px}
-  .pay-icon{display:inline-flex;width:60px;height:60px;border-radius:50%;background:#fff;align-items:center;justify-content:center;margin-bottom:10px}
-  .pay-text{font-size:14px;color:#1d1d1f;margin:6px 0;line-height:1.6}
-  .pay-text-sub{font-size:12px;color:#86868b;margin-top:4px}
-  .pay-strong{color:#ff6b6b;font-weight:600}
+  .qr-box{background:#fff;border-radius:12px;padding:16px;text-align:center;margin:8px 0 14px;border:1px solid #e5e5e7}
+  .qr-box img{width:200px;height:200px;display:block;margin:0 auto 8px;border-radius:8px}
+  .qr-tip{font-size:12px;color:#86868b;line-height:1.6;margin-top:6px}
+  .qr-amount{font-size:18px;color:#ff6b6b;font-weight:600;margin:8px 0 4px}
   .list{list-style:none}
   .list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f2f2f4;font-size:14px}
   .list li:last-child{border-bottom:none}
@@ -50,110 +54,107 @@
   .step.active{display:block}
   .back{background:none;border:none;color:#86868b;font-size:14px;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit}
   .success{background:#e8f8ee;border-radius:12px;padding:14px;margin-bottom:14px;font-size:14px;color:#0a7a3f;line-height:1.6}
+  .warning{background:#fff5f5;border:1px solid #ffd0d0;border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;color:#c92a2a;line-height:1.6}
   .tip{font-size:12px;color:#86868b;margin-bottom:10px;line-height:1.6}
   .loading{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
   .footer{font-size:11px;color:#a1a1a6;text-align:center;margin-top:24px;padding:0 8px;line-height:1.6}
-  .refresh{background:none;border:none;color:#ff6b6b;font-size:13px;cursor:pointer;padding:6px;font-family:inherit;float:right;margin-top:-4px}
-  .refresh:active{opacity:.5}
   .label{font-size:13px;color:#86868b;margin-bottom:6px;display:block}
   .input-group{margin-bottom:12px}
   .code-highlight{background:#fff5f5;border:1px dashed #ff6b6b;border-radius:8px;padding:8px 12px;font-size:13px;color:#ff6b6b;margin:8px 0;text-align:center}
+  .section-title{font-size:13px;color:#86868b;margin:16px 0 10px;padding:0 4px;font-weight:500}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>尊巴小课报名</h1>
-  <p>选课 → 微信付款给老师 → 填昵称完成报名</p>
+  <div class="header-text">
+    <h1>尊巴小课报名</h1>
+    <p>选课 → 微信付款给老师 → 填昵称完成报名</p>
+  </div>
+  <a class="admin-link" href="admin.html">老师入口</a>
 </div>
 
 <div id="step-select" class="step active">
-  <div class="tabs">
-    <button class="tab active" data-class="tue" onclick="selectClass('tue')">
-      <p class="tab-day">周二晚</p>
-      <p class="tab-loc">财大</p>
-      <p class="tab-meta" id="meta-tue">加载中...</p>
-    </button>
-    <button class="tab" data-class="thu" onclick="selectClass('thu')">
-      <p class="tab-day">周四晚</p>
-      <p class="tab-loc">桐梓林</p>
-      <p class="tab-meta" id="meta-thu">加载中...</p>
-    </button>
+  <div id="upcoming-section">
+    <p class="section-title">即将开课</p>
+    <div id="upcoming-list">
+      <p class="loading">加载中...</p>
+    </div>
   </div>
-
-  <div class="card">
-    <p class="card-h" id="class-title">5月5日 周二 · 财大店</p>
-    <div class="row"><span class="row-l">时间</span><span class="row-v" id="class-time">5月5日 19:30-20:30</span></div>
-    <div class="row"><span class="row-l">地点</span><span class="row-v" id="class-loc">兔与飞鸟（财大店）</span></div>
-    <div class="row"><span class="row-l">价格</span><span class="row-v" id="class-price">59 元</span></div>
-    <div class="row"><span class="row-l">已报名</span><span class="row-v"><span class="count-badge" id="class-count">0 人</span></span></div>
+  <div id="ended-section" style="display:none">
+    <p class="section-title">已结束课程</p>
+    <div id="ended-list"></div>
   </div>
+</div>
 
+<div id="step-detail" class="step">
+  <button class="back" onclick="goBack('select')">← 返回选课</button>
   <div class="card">
-    <p class="card-h">已报名同学
-      <button class="refresh" onclick="renderClass()">↻ 刷新</button>
-    </p>
+    <p class="card-h" id="detail-title">—</p>
+    <div class="row"><span class="row-l">日期</span><span class="row-v" id="detail-date">—</span></div>
+    <div class="row"><span class="row-l">时间</span><span class="row-v" id="detail-time">—</span></div>
+    <div class="row"><span class="row-l">地点</span><span class="row-v" id="detail-loc">—</span></div>
+    <div class="row" id="detail-address-row" style="display:none"><span class="row-l">地址</span><span class="row-v" id="detail-address" style="font-size:12px">—</span></div>
+    <div class="row"><span class="row-l">价格</span><span class="row-v" id="detail-price">—</span></div>
+    <div class="row"><span class="row-l">已报名</span><span class="row-v" id="detail-count">— 人</span></div>
+  </div>
+  <div class="card">
+    <p class="card-h">已报名同学</p>
     <ul class="list" id="signup-list"><li class="loading">加载中...</li></ul>
   </div>
-
-  <button class="btn" onclick="goToPay()">我要报名</button>
+  <div id="action-area">
+    <button class="btn" onclick="goToPay()">我要报名</button>
+  </div>
 </div>
 
 <div id="step-pay" class="step">
-  <button class="back" onclick="goBack('select')">← 返回选课</button>
+  <button class="back" onclick="showStep('detail')">← 返回</button>
   <div class="card">
-    <p class="card-h">第 1 步 · 微信付款给老师</p>
-    <p class="tip">课程：<strong id="pay-class-name">5月5日 周二 · 财大店</strong></p>
-    <div class="pay-box">
-      <div class="pay-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#86868b" stroke-width="1.5">
-          <rect x="3" y="3" width="7" height="7" rx="1"/>
-          <rect x="14" y="3" width="7" height="7" rx="1"/>
-          <rect x="3" y="14" width="7" height="7" rx="1"/>
-          <path d="M14 14h3v3M20 14v3M14 20h3M20 20v1"/>
-        </svg>
-      </div>
-      <p class="pay-text">添加老师微信<br/>或扫描课程群里的<span class="pay-strong">收款码</span>转账</p>
-      <p class="pay-text-sub">备注：<span class="pay-strong" id="pay-note">周二财大</span></p>
+    <p class="card-h">第 1 步 · 微信扫码付款</p>
+    <p class="tip">课程：<strong id="pay-class-name">—</strong></p>
+    <div class="qr-box">
+      <img src="payment-qr.jpg" alt="老师收款码" />
+      <p class="qr-amount" id="pay-amount">¥ —</p>
+      <p class="qr-tip">长按图片识别 / 截图后用微信扫一扫</p>
     </div>
-    <p class="tip">付款完成后，请截图保留转账记录，然后点击下一步填写昵称</p>
-    <button class="btn" onclick="goToConfirm()">已完成付款,下一步</button>
+    <div class="warning">
+      ⚠️ 付款时请<strong>务必填写备注</strong>：<span id="pay-note" style="color:#1d1d1f">—</span><br/>
+      并使用<strong>本人微信付款</strong>，方便老师对账
+    </div>
+    <button class="btn" onclick="goToConfirm()">已完成付款，下一步</button>
   </div>
 </div>
 
 <div id="step-confirm" class="step">
-  <button class="back" onclick="goBack('pay')">← 返回上一步</button>
+  <button class="back" onclick="showStep('pay')">← 返回上一步</button>
   <div class="card">
     <p class="card-h">第 2 步 · 填写信息</p>
-
     <div class="input-group">
-      <label class="label">微信昵称（方便老师核对）</label>
+      <label class="label">微信昵称（与付款微信一致）</label>
       <input id="nickname-input" type="text" placeholder="例如：小张同学" maxlength="20" oninput="checkForm()" />
     </div>
-
     <div class="input-group">
       <label class="label">取消码（4 位数字，自己设）</label>
       <input id="code-input" type="tel" inputmode="numeric" pattern="[0-9]{4}" placeholder="例如：1234" maxlength="4" oninput="checkForm()" />
       <p class="tip" style="margin-top:6px;margin-bottom:0">⚠️ 请记好这个码，将来取消报名时需要输入</p>
     </div>
-
     <button class="btn" id="confirm-btn" onclick="submitSignup()" disabled>确认报名</button>
   </div>
 </div>
 
 <div id="step-done" class="step">
-  <div class="success">✓ 报名提交成功！老师确认收款后正式生效，到时课程群里会通知</div>
+  <div class="success">✓ 报名提交成功！老师确认收款后正式生效</div>
   <div class="card">
     <p class="card-h">你的报名信息</p>
     <div class="row"><span class="row-l">课程</span><span class="row-v" id="done-class">—</span></div>
     <div class="row"><span class="row-l">昵称</span><span class="row-v" id="done-name">—</span></div>
-    <div class="row"><span class="row-l">时间</span><span class="row-v" id="done-time">—</span></div>
+    <div class="row"><span class="row-l">日期</span><span class="row-v" id="done-time">—</span></div>
     <div class="code-highlight">
       你的取消码：<strong id="done-code">—</strong><br/>
       <span style="font-size:11px">⚠️ 请截图保存，取消报名时需要</span>
     </div>
   </div>
-  <button class="btn btn-2nd" onclick="goBack('select')">返回查看名单</button>
+  <button class="btn btn-2nd" onclick="goBack('select')">返回查看课程</button>
 </div>
 
 <p class="footer">付款完成后请截图保留凭证 · 老师核对后正式生效</p>
@@ -162,12 +163,8 @@
 const SUPABASE_URL = 'https://xgkjkssuneizzvygefky.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_q_hufo_gOIWZanO2ljxESA_AQCHmfOG';
 
-const CLASSES = {
-  tue: { title: '5月5日 周二 · 财大店', time: '5月5日 19:30-20:30', loc: '兔与飞鸟（财大店）', price: '59 元', note: '周二财大' },
-  thu: { title: '5月7日 周四 · 桐梓林二店', time: '5月7日 19:30-20:30', loc: '兔与飞鸟（桐梓林二店）', price: '59 元', note: '周四桐梓林' }
-};
-
-let current = 'tue';
+let currentClass = null;
+let allClasses = [];
 const $ = id => document.getElementById(id);
 
 async function sbFetch(path, options = {}) {
@@ -185,40 +182,126 @@ async function sbFetch(path, options = {}) {
   }
   const text = await res.text();
   if (!text) return null;
+  try { return JSON.parse(text); } catch (e) { return null; }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${days[d.getDay()]}`;
+}
+
+function isClassEnded(c) {
+  if (c.is_cancelled) return false;
+  const now = new Date();
+  const classEnd = new Date(`${c.date}T${c.end_time}:00`);
+  return now > classEnd;
+}
+
+async function loadClasses() {
   try {
-    return JSON.parse(text);
+    const [classes, signups] = await Promise.all([
+      sbFetch('classes?select=*&order=date.asc'),
+      sbFetch('signups?select=class_ref')
+    ]);
+    allClasses = (classes || []).map(c => {
+      const count = (signups || []).filter(s => s.class_ref === c.id).length;
+      return Object.assign({}, c, { signup_count: count });
+    });
+    renderClassList();
   } catch (e) {
-    return null;
+    console.error(e);
+    $('upcoming-list').innerHTML = '<p class="empty">加载失败，请刷新</p>';
   }
 }
 
-async function loadAllCounts() {
-  for (const k of Object.keys(CLASSES)) {
-    try {
-      const data = await sbFetch(`signups?class_id=eq.${k}&select=id`);
-      $('meta-' + k).textContent = `${(data || []).length} 人已报名`;
-    } catch (e) {
-      console.error(e);
-      $('meta-' + k).textContent = '加载失败';
+function renderClassList() {
+  const upcoming = [];
+  const ended = [];
+  allClasses.forEach(c => {
+    if (c.is_cancelled || isClassEnded(c)) {
+      ended.push(c);
+    } else {
+      upcoming.push(c);
     }
+  });
+
+  const renderCard = (c) => {
+    const isEnded = isClassEnded(c);
+    const isCancelled = c.is_cancelled;
+    let statusBadge = '<span class="class-card-status status-open">报名中</span>';
+    let cardClass = 'class-card';
+    if (isCancelled) {
+      statusBadge = '<span class="class-card-status status-cancelled">已取消</span>';
+      cardClass += ' cancelled';
+    } else if (isEnded) {
+      statusBadge = '<span class="class-card-status status-ended">已结束</span>';
+      cardClass += ' ended';
+    }
+    return `<button class="${cardClass}" onclick="selectClass('${c.id}')">
+      <div class="class-card-top">
+        <span class="class-card-date">${formatDate(c.date)} · ${c.start_time}-${c.end_time}</span>
+        ${statusBadge}
+      </div>
+      <p class="class-card-loc">${escapeHtml(c.location_name)}</p>
+      <p class="class-card-meta">¥${c.price} <span class="class-card-count">${c.signup_count} 人已报名</span></p>
+    </button>`;
+  };
+
+  if (upcoming.length === 0) {
+    $('upcoming-list').innerHTML = '<p class="empty">暂无即将开课的课程</p>';
+  } else {
+    $('upcoming-list').innerHTML = upcoming.map(renderCard).join('');
+  }
+
+  if (ended.length === 0) {
+    $('ended-section').style.display = 'none';
+  } else {
+    $('ended-section').style.display = 'block';
+    $('ended-list').innerHTML = ended.reverse().map(renderCard).join('');
   }
 }
 
-async function renderClass() {
-  const c = CLASSES[current];
-  $('class-title').textContent = c.title;
-  $('class-time').textContent = c.time;
-  $('class-loc').textContent = c.loc;
-  $('class-price').textContent = c.price;
-  $('pay-class-name').textContent = c.title;
-  $('pay-note').textContent = c.note;
+window.selectClass = async function(id) {
+  const c = allClasses.find(x => x.id === id);
+  if (!c) return;
+  currentClass = c;
+  $('detail-title').textContent = c.location_name;
+  $('detail-date').textContent = formatDate(c.date);
+  $('detail-time').textContent = `${c.start_time} - ${c.end_time}`;
+  $('detail-loc').textContent = c.location_name;
+  if (c.location_address) {
+    $('detail-address-row').style.display = '';
+    $('detail-address').textContent = c.location_address;
+  } else {
+    $('detail-address-row').style.display = 'none';
+  }
+  $('detail-price').textContent = `¥ ${c.price}`;
+  $('pay-class-name').textContent = `${formatDate(c.date)} · ${c.location_name}`;
+  $('pay-amount').textContent = `¥ ${c.price}`;
+  $('pay-note').textContent = c.payment_note || `${formatDate(c.date)} ${c.location_name}`;
 
+  const actionArea = $('action-area');
+  if (c.is_cancelled) {
+    actionArea.innerHTML = '<div class="warning">此课程已取消，无法报名</div>';
+  } else if (isClassEnded(c)) {
+    actionArea.innerHTML = '<div class="tip" style="text-align:center">此课程已结束</div>';
+  } else {
+    actionArea.innerHTML = '<button class="btn" onclick="goToPay()">我要报名</button>';
+  }
+  showStep('detail');
+  await loadSignupsForClass(c.id);
+};
+
+async function loadSignupsForClass(classId) {
   $('signup-list').innerHTML = '<li class="loading">加载中...</li>';
-
   try {
-    const data = (await sbFetch(`signups?class_id=eq.${current}&select=*&order=created_at.asc`)) || [];
-    $('class-count').textContent = `${data.length} 人`;
-    $('meta-' + current).textContent = `${data.length} 人已报名`;
+    const data = (await sbFetch(`signups?class_ref=eq.${classId}&select=*&order=created_at.asc`)) || [];
+    $('detail-count').textContent = `${data.length} 人`;
     const ul = $('signup-list');
     if (data.length === 0) {
       ul.innerHTML = '<li class="empty">还没有人报名，快来抢前排～</li>';
@@ -237,20 +320,8 @@ async function renderClass() {
     }
   } catch (e) {
     console.error(e);
-    $('signup-list').innerHTML = '<li class="empty">加载失败，请刷新</li>';
+    $('signup-list').innerHTML = '<li class="empty">加载失败</li>';
   }
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function selectClass(k) {
-  current = k;
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.class === k);
-  });
-  renderClass();
 }
 
 function showStep(name) {
@@ -259,47 +330,49 @@ function showStep(name) {
   window.scrollTo(0, 0);
 }
 
-function goToPay() { showStep('pay'); }
-function goToConfirm() {
+window.goToPay = function() { showStep('pay'); };
+window.goToConfirm = function() {
   showStep('confirm');
   setTimeout(() => $('nickname-input').focus(), 100);
-}
+};
 
-function goBack(name) {
+window.goBack = function(name) {
   if (name === 'select') {
     $('nickname-input').value = '';
     $('code-input').value = '';
     checkForm();
-    loadAllCounts();
-    renderClass();
+    loadClasses();
   }
   showStep(name);
-}
+};
 
-function checkForm() {
+window.checkForm = function() {
   const name = $('nickname-input').value.trim();
   const code = $('code-input').value.trim();
   $('confirm-btn').disabled = !(name.length > 0 && /^\d{4}$/.test(code));
-}
+};
 
-async function submitSignup() {
+window.submitSignup = async function() {
   const name = $('nickname-input').value.trim();
   const code = $('code-input').value.trim();
-  if (!name || !/^\d{4}$/.test(code)) return;
+  if (!name || !/^\d{4}$/.test(code) || !currentClass) return;
   const btn = $('confirm-btn');
   btn.disabled = true;
   btn.textContent = '提交中...';
-
   try {
     await sbFetch('signups', {
       method: 'POST',
       headers: { 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ class_id: current, nickname: name, cancel_code: code })
+      body: JSON.stringify({
+        class_id: currentClass.id,
+        class_ref: currentClass.id,
+        nickname: name,
+        cancel_code: code
+      })
     });
-    const c = CLASSES[current];
-    $('done-class').textContent = c.title;
+    $('done-class').textContent = currentClass.location_name;
     $('done-name').textContent = name;
-    $('done-time').textContent = c.time;
+    $('done-time').textContent = `${formatDate(currentClass.date)} ${currentClass.start_time}`;
     $('done-code').textContent = code;
     showStep('done');
   } catch (e) {
@@ -309,9 +382,9 @@ async function submitSignup() {
     btn.disabled = false;
     btn.textContent = '确认报名';
   }
-}
+};
 
-async function cancelSignup(id, nickname) {
+window.cancelSignup = async function(id, nickname) {
   const code = prompt(`取消「${nickname}」的报名\n\n请输入当时设置的 4 位取消码：`);
   if (code === null) return;
   if (!/^\d{4}$/.test(code.trim())) {
@@ -325,8 +398,8 @@ async function cancelSignup(id, nickname) {
     });
     if (Array.isArray(data) && data.length > 0) {
       alert('已成功取消报名');
-      loadAllCounts();
-      renderClass();
+      if (currentClass) await loadSignupsForClass(currentClass.id);
+      loadClasses();
     } else {
       alert('取消码错误，无法取消。\n如果忘了取消码，请联系老师处理。');
     }
@@ -334,10 +407,9 @@ async function cancelSignup(id, nickname) {
     console.error(e);
     alert('操作失败：' + e.message);
   }
-}
+};
 
-loadAllCounts();
-renderClass();
+loadClasses();
 </script>
 </body>
 </html>

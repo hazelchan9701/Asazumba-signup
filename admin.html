@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>老师后台 · 尊巴小课</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:#f5f5f7;color:#1d1d1f;line-height:1.5;min-height:100vh;padding:16px;max-width:480px;margin:0 auto}
+  .header{margin-bottom:20px;padding:4px 4px 0;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .header h1{font-size:22px;font-weight:600}
+  .header-right{display:flex;gap:8px;align-items:center}
+  .student-link{font-size:11px;color:#a1a1a6;text-decoration:none;padding:4px 8px;border:1px solid #e5e5e7;border-radius:6px;background:#fff}
+  .logout-btn{font-size:11px;color:#a1a1a6;background:none;border:1px solid #e5e5e7;border-radius:6px;padding:4px 8px;cursor:pointer;font-family:inherit}
+  .card{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .card-h{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  input[type=text],input[type=password],input[type=number],input[type=date],input[type=time],textarea{width:100%;padding:10px 12px;font-size:14px;border:1px solid #d2d2d7;border-radius:8px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s}
+  input:focus,textarea:focus{border-color:#ff6b6b}
+  textarea{resize:vertical;min-height:60px}
+  .btn{width:100%;padding:12px;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;border:none;background:#1d1d1f;color:#fff;transition:all .15s;font-family:inherit;-webkit-appearance:none}
+  .btn:hover{opacity:.85}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-2nd{background:#fff;color:#1d1d1f;border:1px solid #d2d2d7}
+  .btn-danger{background:#c92a2a;color:#fff}
+  .btn-small{padding:6px 12px;font-size:12px;border-radius:6px;width:auto}
+  .row{display:flex;gap:8px;margin-bottom:10px}
+  .row > *{flex:1}
+  .label{font-size:12px;color:#86868b;display:block;margin-bottom:4px}
+  .input-group{margin-bottom:12px}
+  .class-item{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #e5e5e7}
+  .class-item.cancelled{opacity:.5}
+  .class-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+  .class-item-info{flex:1;min-width:0}
+  .class-item-date{font-size:12px;color:#86868b;font-weight:500}
+  .class-item-loc{font-size:14px;font-weight:600;color:#1d1d1f;margin:2px 0}
+  .class-item-meta{font-size:12px;color:#86868b}
+  .class-item-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+  .class-item-actions button{padding:4px 10px;font-size:11px;border-radius:6px;cursor:pointer;border:1px solid #e5e5e7;background:#fff;font-family:inherit;color:#1d1d1f;white-space:nowrap}
+  .class-item-actions button.delete{color:#c92a2a;border-color:#ffcccc}
+  .class-item-actions button:hover{background:#f5f5f7}
+  .signup-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f2f2f4;font-size:13px}
+  .signup-row:last-child{border-bottom:none}
+  .signup-name{flex:1;color:#1d1d1f}
+  .signup-time{font-size:11px;color:#a1a1a6}
+  .signup-code{font-size:11px;color:#a1a1a6;background:#f5f5f7;padding:2px 6px;border-radius:4px;margin-right:6px}
+  .signup-del{background:none;border:none;color:#c92a2a;cursor:pointer;font-size:11px;padding:2px 6px;font-family:inherit}
+  .signup-del:hover{text-decoration:underline}
+  .empty{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
+  .loading{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
+  .step{display:none}
+  .step.active{display:block}
+  .login-card{margin-top:60px}
+  .error-msg{font-size:12px;color:#c92a2a;margin-top:6px}
+  details{background:#fff;border-radius:10px;margin-bottom:8px;overflow:hidden}
+  summary{padding:12px;cursor:pointer;font-size:13px;font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:'▼';float:right;font-size:10px;color:#a1a1a6;transition:transform .15s}
+  details[open] summary::after{transform:rotate(180deg)}
+  .signups-content{padding:0 12px 12px}
+  .empty-classes{background:#fff;border-radius:12px;padding:30px 20px;text-align:center;color:#a1a1a6;font-size:13px}
+  .stat{display:flex;gap:16px;margin-bottom:12px}
+  .stat-item{flex:1;background:#fff;border-radius:10px;padding:12px;text-align:center}
+  .stat-num{font-size:20px;font-weight:600;color:#ff6b6b}
+  .stat-label{font-size:11px;color:#86868b;margin-top:2px}
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="step-login" class="step active">
+  <div class="header">
+    <h1>老师后台</h1>
+    <a class="student-link" href="index.html">返回学员页</a>
+  </div>
+  <div class="card login-card">
+    <p class="card-h">请输入密码</p>
+    <div class="input-group">
+      <input id="pwd-input" type="password" placeholder="后台密码" onkeypress="if(event.key==='Enter')login()" />
+      <p class="error-msg" id="login-error" style="display:none">密码错误</p>
+    </div>
+    <button class="btn" onclick="login()">登 录</button>
+  </div>
+</div>
+
+<!-- 主页 -->
+<div id="step-main" class="step">
+  <div class="header">
+    <h1>老师后台</h1>
+    <div class="header-right">
+      <a class="student-link" href="index.html">学员视图</a>
+      <button class="logout-btn" onclick="logout()">退出</button>
+    </div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-upcoming">—</div>
+      <div class="stat-label">即将开课</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="stat-signups">—</div>
+      <div class="stat-label">总报名人数</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-h">➕ 创建新课次</p>
+    <div class="row">
+      <div>
+        <label class="label">日期</label>
+        <input id="new-date" type="date" />
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label class="label">开始时间</label>
+        <input id="new-start" type="time" value="19:30" />
+      </div>
+      <div>
+        <label class="label">结束时间</label>
+        <input id="new-end" type="time" value="20:30" />
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="label">地点（必填）</label>
+      <input id="new-loc" type="text" placeholder="例：兔与飞鸟（财大店）" />
+    </div>
+    <div class="input-group">
+      <label class="label">详细地址（可选）</label>
+      <textarea id="new-addr" placeholder="例：成都市青羊区财大南门大地新光华广场A1栋527"></textarea>
+    </div>
+    <div class="row">
+      <div>
+        <label class="label">价格（元）</label>
+        <input id="new-price" type="number" min="0" value="59" />
+      </div>
+      <div>
+        <label class="label">付款备注</label>
+        <input id="new-note" type="text" placeholder="自动生成" />
+      </div>
+    </div>
+    <button class="btn" onclick="createClass()">创建课次</button>
+  </div>
+
+  <p style="font-size:13px;color:#86868b;margin:16px 4px 10px;font-weight:500">📋 所有课次</p>
+  <div id="classes-list">
+    <p class="loading">加载中...</p>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://xgkjkssuneizzvygefky.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_q_hufo_gOIWZanO2ljxESA_AQCHmfOG';
+const ADMIN_PWD = 'FANxiao123';
+
+const $ = id => document.getElementById(id);
+
+async function sbFetch(path, options = {}) {
+  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    ...(options.headers || {})
+  };
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  const text = await res.text();
+  if (!text) return null;
+  try { return JSON.parse(text); } catch (e) { return null; }
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${days[d.getDay()]}`;
+}
+
+function showStep(name) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  $('step-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+window.login = function() {
+  const pwd = $('pwd-input').value;
+  if (pwd === ADMIN_PWD) {
+    sessionStorage.setItem('zumba_admin', 'yes');
+    showStep('main');
+    setDefaultDate();
+    loadClasses();
+  } else {
+    $('login-error').style.display = 'block';
+  }
+};
+
+window.logout = function() {
+  sessionStorage.removeItem('zumba_admin');
+  $('pwd-input').value = '';
+  $('login-error').style.display = 'none';
+  showStep('login');
+};
+
+function setDefaultDate() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  $('new-date').value = tomorrow.toISOString().slice(0, 10);
+}
+
+window.createClass = async function() {
+  const date = $('new-date').value;
+  const start_time = $('new-start').value;
+  const end_time = $('new-end').value;
+  const location_name = $('new-loc').value.trim();
+  const location_address = $('new-addr').value.trim();
+  const price = parseInt($('new-price').value, 10);
+  let payment_note = $('new-note').value.trim();
+
+  if (!date || !start_time || !end_time || !location_name) {
+    alert('请填写日期、时间、地点');
+    return;
+  }
+  if (isNaN(price) || price < 0) {
+    alert('价格不正确');
+    return;
+  }
+  if (!payment_note) {
+    payment_note = `${date} ${location_name}`;
+  }
+
+  const id = `cls-${date}-${Date.now().toString(36)}`;
+  try {
+    await sbFetch('classes', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        id, date, start_time, end_time,
+        location_name, location_address,
+        price, payment_note,
+        is_cancelled: false
+      })
+    });
+    alert('课次创建成功');
+    $('new-loc').value = '';
+    $('new-addr').value = '';
+    $('new-note').value = '';
+    setDefaultDate();
+    loadClasses();
+  } catch (e) {
+    alert('创建失败：' + e.message);
+  }
+};
+
+async function loadClasses() {
+  $('classes-list').innerHTML = '<p class="loading">加载中...</p>';
+  try {
+    const [classes, signups] = await Promise.all([
+      sbFetch('classes?select=*&order=date.desc'),
+      sbFetch('signups?select=*&order=created_at.asc')
+    ]);
+    const allClasses = classes || [];
+    const allSignups = signups || [];
+
+    // 计算统计
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const upcoming = allClasses.filter(c => {
+      if (c.is_cancelled) return false;
+      const classEnd = new Date(`${c.date}T${c.end_time}:00`);
+      return classEnd >= new Date();
+    });
+    $('stat-upcoming').textContent = upcoming.length;
+    $('stat-signups').textContent = allSignups.length;
+
+    if (allClasses.length === 0) {
+      $('classes-list').innerHTML = '<div class="empty-classes">还没有创建任何课次</div>';
+      return;
+    }
+
+    $('classes-list').innerHTML = allClasses.map(c => {
+      const classSignups = allSignups.filter(s => s.class_ref === c.id);
+      const isCancelled = c.is_cancelled;
+      const classEnd = new Date(`${c.date}T${c.end_time}:00`);
+      const isEnded = !isCancelled && new Date() > classEnd;
+      const statusLabel = isCancelled ? '（已取消）' : isEnded ? '（已结束）' : '';
+
+      const signupsHtml = classSignups.length === 0
+        ? '<p class="empty">暂无报名</p>'
+        : classSignups.map(s => {
+            const t = new Date(s.created_at);
+            const timeStr = `${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+            return `<div class="signup-row">
+              <span class="signup-name">${escapeHtml(s.nickname)}</span>
+              <span class="signup-code">码:${escapeHtml(s.cancel_code || '?')}</span>
+              <span class="signup-time">${timeStr}</span>
+              <button class="signup-del" onclick="adminDeleteSignup('${s.id}', '${escapeHtml(s.nickname)}')">删除</button>
+            </div>`;
+          }).join('');
+
+      return `<details class="${isCancelled ? 'cancelled' : ''}">
+        <summary>
+          <div class="class-item-info">
+            <div class="class-item-date">${formatDate(c.date)} · ${c.start_time}-${c.end_time} ${statusLabel}</div>
+            <div class="class-item-loc">${escapeHtml(c.location_name)}</div>
+            <div class="class-item-meta">¥${c.price} · ${classSignups.length} 人报名</div>
+          </div>
+        </summary>
+        <div class="signups-content">
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            ${!isCancelled && !isEnded ? `<button class="btn btn-2nd btn-small" onclick="cancelClass('${c.id}')">停课</button>` : ''}
+            ${isCancelled ? `<button class="btn btn-2nd btn-small" onclick="restoreClass('${c.id}')">恢复</button>` : ''}
+            <button class="btn btn-2nd btn-small" onclick="copyClass('${c.id}')">复制创建</button>
+            <button class="btn btn-small" style="background:#c92a2a;color:#fff" onclick="deleteClass('${c.id}', ${classSignups.length})">永久删除</button>
+          </div>
+          ${signupsHtml}
+        </div>
+      </details>`;
+    }).join('');
+  } catch (e) {
+    console.error(e);
+    $('classes-list').innerHTML = '<p class="empty">加载失败</p>';
+  }
+}
+
+window.cancelClass = async function(id) {
+  if (!confirm('确认停课？学员页面将显示「已取消」标记。')) return;
+  try {
+    await sbFetch(`classes?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ is_cancelled: true })
+    });
+    loadClasses();
+  } catch (e) {
+    alert('操作失败：' + e.message);
+  }
+};
+
+window.restoreClass = async function(id) {
+  try {
+    await sbFetch(`classes?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ is_cancelled: false })
+    });
+    loadClasses();
+  } catch (e) {
+    alert('操作失败：' + e.message);
+  }
+};
+
+window.deleteClass = async function(id, signupCount) {
+  let msg = '确认永久删除该课次？';
+  if (signupCount > 0) {
+    msg += `\n\n⚠️ 该课次还有 ${signupCount} 人报名，删除后报名记录也会一起消失！`;
+  }
+  if (!confirm(msg)) return;
+  try {
+    // 先删报名记录
+    await sbFetch(`signups?class_ref=eq.${id}`, { method: 'DELETE' });
+    // 再删课次
+    await sbFetch(`classes?id=eq.${id}`, { method: 'DELETE' });
+    loadClasses();
+  } catch (e) {
+    alert('删除失败：' + e.message);
+  }
+};
+
+window.copyClass = async function(id) {
+  try {
+    const classes = await sbFetch(`classes?id=eq.${id}&select=*`);
+    if (!classes || classes.length === 0) return;
+    const c = classes[0];
+    // 自动算下周同一天
+    const oldDate = new Date(c.date + 'T00:00:00');
+    oldDate.setDate(oldDate.getDate() + 7);
+    const newDate = oldDate.toISOString().slice(0, 10);
+    $('new-date').value = newDate;
+    $('new-start').value = c.start_time;
+    $('new-end').value = c.end_time;
+    $('new-loc').value = c.location_name;
+    $('new-addr').value = c.location_address || '';
+    $('new-price').value = c.price;
+    $('new-note').value = '';
+    window.scrollTo(0, 0);
+    alert('已填入下周同一天的信息，确认无误后点「创建课次」');
+  } catch (e) {
+    alert('操作失败：' + e.message);
+  }
+};
+
+window.adminDeleteSignup = async function(id, nickname) {
+  if (!confirm(`确认删除「${nickname}」的报名记录？`)) return;
+  try {
+    await sbFetch(`signups?id=eq.${id}`, { method: 'DELETE' });
+    loadClasses();
+  } catch (e) {
+    alert('删除失败：' + e.message);
+  }
+};
+
+// 自动登录（同一会话内）
+if (sessionStorage.getItem('zumba_admin') === 'yes') {
+  showStep('main');
+  setDefaultDate();
+  loadClasses();
+}
+</script>
+</body>
+</html>
