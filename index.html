@@ -24,7 +24,6 @@
   .status-cancelled{background:#ffeaea;color:#c92a2a}
   .class-card-loc{font-size:15px;font-weight:600;color:#1d1d1f;margin-bottom:6px}
   .class-card-meta{font-size:12px;color:#86868b}
-  .class-card-count{display:inline-flex;align-items:center;background:#ffe5e5;color:#ff6b6b;font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600;margin-left:6px}
   .card{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:14px}
   .card-h{font-size:15px;font-weight:600;margin-bottom:12px}
   .row{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;gap:8px}
@@ -37,19 +36,17 @@
   .btn:active{transform:scale(.98)}
   .btn:disabled{opacity:.4;cursor:not-allowed}
   .btn-2nd{background:#fff;color:#1d1d1f;border:1px solid #d2d2d7}
+  .btn-link{background:none;color:#86868b;border:none;font-size:13px;text-decoration:underline;cursor:pointer;padding:8px;font-family:inherit;width:100%;margin-top:8px}
+  .btn-link:hover{color:#ff6b6b}
   .qr-box{background:#fff;border-radius:12px;padding:16px;text-align:center;margin:8px 0 14px;border:1px solid #e5e5e7}
   .qr-box img{width:280px;max-width:100%;height:auto;display:block;margin:0 auto 8px;border-radius:8px;cursor:pointer}
   .qr-tip{font-size:12px;color:#86868b;line-height:1.6;margin-top:6px}
   .qr-amount{font-size:18px;color:#ff6b6b;font-weight:600;margin:8px 0 4px}
-  .list{list-style:none}
-  .list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f2f2f4;font-size:14px}
-  .list li:last-child{border-bottom:none}
-  .avatar{width:32px;height:32px;border-radius:50%;background:#ffe5e5;color:#ff6b6b;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-  .name{flex:1;color:#1d1d1f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .time{font-size:11px;color:#a1a1a6;flex-shrink:0;margin-right:8px}
-  .cancel-link{font-size:12px;color:#a1a1a6;background:none;border:none;cursor:pointer;font-family:inherit;padding:4px 6px}
-  .cancel-link:hover{color:#ff6b6b;text-decoration:underline}
-  .empty{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
+  .qr-modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:999;align-items:center;justify-content:center;padding:20px;flex-direction:column}
+  .qr-modal.active{display:flex}
+  .qr-modal img{max-width:100%;max-height:75vh;border-radius:8px;background:#fff;padding:12px}
+  .qr-modal-close{position:absolute;top:20px;right:20px;color:#fff;font-size:36px;background:none;border:none;cursor:pointer;font-family:inherit;line-height:1;padding:4px 12px}
+  .qr-modal-tip{margin-top:20px;color:#fff;font-size:14px;text-align:center}
   .step{display:none}
   .step.active{display:block}
   .back{background:none;border:none;color:#86868b;font-size:14px;cursor:pointer;padding:6px 0;margin-bottom:8px;font-family:inherit}
@@ -57,6 +54,7 @@
   .warning{background:#fff5f5;border:1px solid #ffd0d0;border-radius:12px;padding:12px;margin-bottom:14px;font-size:13px;color:#c92a2a;line-height:1.6}
   .tip{font-size:12px;color:#86868b;margin-bottom:10px;line-height:1.6}
   .loading{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
+  .empty{font-size:13px;color:#a1a1a6;text-align:center;padding:14px 0}
   .footer{font-size:11px;color:#a1a1a6;text-align:center;margin-top:24px;padding:0 8px;line-height:1.6}
   .label{font-size:13px;color:#86868b;margin-bottom:6px;display:block}
   .input-group{margin-bottom:12px}
@@ -96,14 +94,10 @@
     <div class="row"><span class="row-l">地点</span><span class="row-v" id="detail-loc">—</span></div>
     <div class="row" id="detail-address-row" style="display:none"><span class="row-l">地址</span><span class="row-v" id="detail-address" style="font-size:12px">—</span></div>
     <div class="row"><span class="row-l">价格</span><span class="row-v" id="detail-price">—</span></div>
-    <div class="row"><span class="row-l">已报名</span><span class="row-v" id="detail-count">— 人</span></div>
-  </div>
-  <div class="card">
-    <p class="card-h">已报名同学</p>
-    <ul class="list" id="signup-list"><li class="loading">加载中...</li></ul>
   </div>
   <div id="action-area">
     <button class="btn" onclick="goToPay()">我要报名</button>
+    <button class="btn-link" onclick="goCancelMine()">取消我的报名</button>
   </div>
 </div>
 
@@ -113,9 +107,9 @@
     <p class="card-h">第 1 步 · 微信扫码付款</p>
     <p class="tip">课程：<strong id="pay-class-name">—</strong></p>
     <div class="qr-box">
-      <img src="payment-qr.jpg" alt="老师收款码" />
+      <img src="payment-qr.jpg" alt="老师收款码" onclick="showQrModal()" />
       <p class="qr-amount" id="pay-amount">¥ —</p>
-      <p class="qr-tip">长按图片识别 / 截图后用微信扫一扫</p>
+      <p class="qr-tip">点击图片放大 · 长按可识别二维码</p>
     </div>
     <div class="warning">
       ⚠️ 付款时请<strong>务必填写备注</strong>：<span id="pay-note" style="color:#1d1d1f">—</span><br/>
@@ -142,6 +136,24 @@
   </div>
 </div>
 
+<div id="step-cancel" class="step">
+  <button class="back" onclick="showStep('detail')">← 返回</button>
+  <div class="card">
+    <p class="card-h">取消我的报名</p>
+    <p class="tip">填写报名时使用的昵称和取消码</p>
+    <div class="input-group">
+      <label class="label">微信昵称</label>
+      <input id="cancel-nickname-input" type="text" placeholder="报名时填的昵称" maxlength="20" oninput="checkCancelForm()" />
+    </div>
+    <div class="input-group">
+      <label class="label">取消码（4 位数字）</label>
+      <input id="cancel-code-input" type="tel" inputmode="numeric" pattern="[0-9]{4}" placeholder="报名时设的 4 位码" maxlength="4" oninput="checkCancelForm()" />
+    </div>
+    <button class="btn" id="cancel-confirm-btn" onclick="submitCancel()" disabled>确认取消</button>
+    <p class="tip" style="margin-top:12px;text-align:center">如果忘了取消码，请联系老师处理</p>
+  </div>
+</div>
+
 <div id="step-done" class="step">
   <div class="success">✓ 报名提交成功！老师确认收款后正式生效</div>
   <div class="card">
@@ -155,6 +167,12 @@
     </div>
   </div>
   <button class="btn btn-2nd" onclick="goBack('select')">返回查看课程</button>
+</div>
+
+<div class="qr-modal" id="qr-modal" onclick="hideQrModal()">
+  <button class="qr-modal-close" onclick="hideQrModal()">×</button>
+  <img src="payment-qr.jpg" alt="老师收款码" onclick="event.stopPropagation()" />
+  <p class="qr-modal-tip">长按图片识别二维码 · 点击空白处关闭</p>
 </div>
 
 <p class="footer">付款完成后请截图保留凭证 · 老师核对后正式生效</p>
@@ -204,14 +222,8 @@ function isClassEnded(c) {
 
 async function loadClasses() {
   try {
-    const [classes, signups] = await Promise.all([
-      sbFetch('classes?select=*&order=date.asc'),
-      sbFetch('signups?select=class_ref')
-    ]);
-    allClasses = (classes || []).map(c => {
-      const count = (signups || []).filter(s => s.class_ref === c.id).length;
-      return Object.assign({}, c, { signup_count: count });
-    });
+    const classes = await sbFetch('classes?select=*&order=date.asc');
+    allClasses = classes || [];
     renderClassList();
   } catch (e) {
     console.error(e);
@@ -248,7 +260,7 @@ function renderClassList() {
         ${statusBadge}
       </div>
       <p class="class-card-loc">${escapeHtml(c.location_name)}</p>
-      <p class="class-card-meta">¥${c.price} <span class="class-card-count">${c.signup_count} 人已报名</span></p>
+      <p class="class-card-meta">¥${c.price}</p>
     </button>`;
   };
 
@@ -266,7 +278,7 @@ function renderClassList() {
   }
 }
 
-window.selectClass = async function(id) {
+window.selectClass = function(id) {
   const c = allClasses.find(x => x.id === id);
   if (!c) return;
   currentClass = c;
@@ -291,38 +303,10 @@ window.selectClass = async function(id) {
   } else if (isClassEnded(c)) {
     actionArea.innerHTML = '<div class="tip" style="text-align:center">此课程已结束</div>';
   } else {
-    actionArea.innerHTML = '<button class="btn" onclick="goToPay()">我要报名</button>';
+    actionArea.innerHTML = '<button class="btn" onclick="goToPay()">我要报名</button><button class="btn-link" onclick="goCancelMine()">取消我的报名</button>';
   }
   showStep('detail');
-  await loadSignupsForClass(c.id);
 };
-
-async function loadSignupsForClass(classId) {
-  $('signup-list').innerHTML = '<li class="loading">加载中...</li>';
-  try {
-    const data = (await sbFetch(`signups?class_ref=eq.${classId}&select=*&order=created_at.asc`)) || [];
-    $('detail-count').textContent = `${data.length} 人`;
-    const ul = $('signup-list');
-    if (data.length === 0) {
-      ul.innerHTML = '<li class="empty">还没有人报名，快来抢前排～</li>';
-    } else {
-      ul.innerHTML = data.map(s => {
-        const initial = s.nickname.slice(0, 1).toUpperCase();
-        const t = new Date(s.created_at);
-        const dateStr = `${t.getMonth() + 1}/${t.getDate()} ${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-        return `<li>
-          <div class="avatar">${escapeHtml(initial)}</div>
-          <span class="name">${escapeHtml(s.nickname)}</span>
-          <span class="time">${dateStr}</span>
-          <button class="cancel-link" onclick="cancelSignup('${s.id}', '${escapeHtml(s.nickname)}')">取消</button>
-        </li>`;
-      }).join('');
-    }
-  } catch (e) {
-    console.error(e);
-    $('signup-list').innerHTML = '<li class="empty">加载失败</li>';
-  }
-}
 
 function showStep(name) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -334,6 +318,14 @@ window.goToPay = function() { showStep('pay'); };
 window.goToConfirm = function() {
   showStep('confirm');
   setTimeout(() => $('nickname-input').focus(), 100);
+};
+
+window.goCancelMine = function() {
+  $('cancel-nickname-input').value = '';
+  $('cancel-code-input').value = '';
+  checkCancelForm();
+  showStep('cancel');
+  setTimeout(() => $('cancel-nickname-input').focus(), 100);
 };
 
 window.goBack = function(name) {
@@ -350,6 +342,12 @@ window.checkForm = function() {
   const name = $('nickname-input').value.trim();
   const code = $('code-input').value.trim();
   $('confirm-btn').disabled = !(name.length > 0 && /^\d{4}$/.test(code));
+};
+
+window.checkCancelForm = function() {
+  const name = $('cancel-nickname-input').value.trim();
+  const code = $('cancel-code-input').value.trim();
+  $('cancel-confirm-btn').disabled = !(name.length > 0 && /^\d{4}$/.test(code));
 };
 
 window.submitSignup = async function() {
@@ -384,30 +382,40 @@ window.submitSignup = async function() {
   }
 };
 
-window.cancelSignup = async function(id, nickname) {
-  const code = prompt(`取消「${nickname}」的报名\n\n请输入当时设置的 4 位取消码：`);
-  if (code === null) return;
-  if (!/^\d{4}$/.test(code.trim())) {
-    alert('取消码必须是 4 位数字');
-    return;
-  }
+window.submitCancel = async function() {
+  const name = $('cancel-nickname-input').value.trim();
+  const code = $('cancel-code-input').value.trim();
+  if (!name || !/^\d{4}$/.test(code) || !currentClass) return;
+
+  const btn = $('cancel-confirm-btn');
+  btn.disabled = true;
+  btn.textContent = '处理中...';
+
   try {
-    const data = await sbFetch(`signups?id=eq.${id}&cancel_code=eq.${code.trim()}`, {
-      method: 'DELETE',
-      headers: { 'Prefer': 'return=representation' }
-    });
+    const data = await sbFetch(
+      `signups?class_ref=eq.${currentClass.id}&nickname=eq.${encodeURIComponent(name)}&cancel_code=eq.${code}`,
+      {
+        method: 'DELETE',
+        headers: { 'Prefer': 'return=representation' }
+      }
+    );
     if (Array.isArray(data) && data.length > 0) {
       alert('已成功取消报名');
-      if (currentClass) await loadSignupsForClass(currentClass.id);
-      loadClasses();
+      showStep('detail');
     } else {
-      alert('取消码错误，无法取消。\n如果忘了取消码，请联系老师处理。');
+      alert('找不到匹配的报名记录\n\n请检查昵称和取消码是否正确，或联系老师处理');
     }
   } catch (e) {
     console.error(e);
     alert('操作失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '确认取消';
   }
 };
+
+window.showQrModal = function() { $('qr-modal').classList.add('active'); };
+window.hideQrModal = function() { $('qr-modal').classList.remove('active'); };
 
 loadClasses();
 </script>
